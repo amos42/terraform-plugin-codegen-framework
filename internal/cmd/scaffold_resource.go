@@ -22,6 +22,7 @@ import (
 type ScaffoldResourceCommand struct {
 	UI                    cli.Ui
 	flagResourceNameSnake string
+	flagTemplateDir       string
 	flagOutputDir         string
 	flagOutputFile        string
 	flagPackageName       string
@@ -33,6 +34,7 @@ func (cmd *ScaffoldResourceCommand) Flags() *flag.FlagSet {
 
 	fs.StringVar(&cmd.flagResourceNameSnake, "name", "", "name of resource in snake case without the provider type prefix, required")
 	fs.BoolVar(&cmd.flagForceOverwrite, "force", false, "force creation, overwriting existing files")
+	fs.StringVar(&cmd.flagTemplateDir, "template-dir", "", "directory path to scaffolded template files")
 	fs.StringVar(&cmd.flagOutputDir, "output-dir", ".", "directory path to output scaffolded code file")
 	fs.StringVar(&cmd.flagOutputFile, "output-file", "", "file name and extension to write scaffolded code to, default will use the --name flag with '_resource.go' suffix")
 	fs.StringVar(&cmd.flagPackageName, "package", "provider", "name of Go package for scaffolded code file")
@@ -110,7 +112,7 @@ func (cmd *ScaffoldResourceCommand) runInternal(_ context.Context) error {
 		return fmt.Errorf("'%s' is not a valid Terraform resource identifier", cmd.flagResourceNameSnake)
 	}
 
-	goBytes, err := scaffold.ResourceBytes(resourceIdentifier, cmd.flagPackageName)
+	goBytes, err := scaffold.ResourceBytes(resourceIdentifier, cmd.flagPackageName, cmd.flagTemplateDir)
 	if err != nil {
 		return fmt.Errorf("error creating scaffolding resource Go code: %w", err)
 	}

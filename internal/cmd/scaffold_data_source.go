@@ -22,6 +22,7 @@ import (
 type ScaffoldDataSourceCommand struct {
 	UI                      cli.Ui
 	flagDataSourceNameSnake string
+	flagTemplateDir         string
 	flagOutputDir           string
 	flagOutputFile          string
 	flagPackageName         string
@@ -33,6 +34,7 @@ func (cmd *ScaffoldDataSourceCommand) Flags() *flag.FlagSet {
 
 	fs.StringVar(&cmd.flagDataSourceNameSnake, "name", "", "name of data source in snake case without the provider type prefix, required")
 	fs.BoolVar(&cmd.flagForceOverwrite, "force", false, "force creation, overwriting existing files")
+	fs.StringVar(&cmd.flagTemplateDir, "template-dir", "", "directory path to scaffolded template files")
 	fs.StringVar(&cmd.flagOutputDir, "output-dir", ".", "directory path to output scaffolded code file")
 	fs.StringVar(&cmd.flagOutputFile, "output-file", "", "file name and extension to write scaffolded code to, default will use the --name flag with '_data_source.go' suffix")
 	fs.StringVar(&cmd.flagPackageName, "package", "provider", "name of Go package for scaffolded code file")
@@ -110,7 +112,7 @@ func (cmd *ScaffoldDataSourceCommand) runInternal(_ context.Context) error {
 		return fmt.Errorf("'%s' is not a valid Terraform data source identifier", cmd.flagDataSourceNameSnake)
 	}
 
-	goBytes, err := scaffold.DataSourceBytes(dataSourceIdentifier, cmd.flagPackageName)
+	goBytes, err := scaffold.DataSourceBytes(dataSourceIdentifier, cmd.flagPackageName, cmd.flagTemplateDir)
 	if err != nil {
 		return fmt.Errorf("error creating scaffolding data source Go code: %w", err)
 	}

@@ -5,14 +5,22 @@ package scaffold
 
 import (
 	"bytes"
+	"path/filepath"
 	"text/template"
 
 	"github.com/hashicorp/terraform-plugin-codegen-framework/internal/schema"
 )
 
 // ProviderBytes will create scaffolding Go code bytes for a Terraform Plugin Framework provider
-func ProviderBytes(providerIdentifier schema.FrameworkIdentifier, packageName string) ([]byte, error) {
-	t, err := template.New("provider_scaffold").Parse(providerScaffoldGoTemplate)
+func ProviderBytes(providerIdentifier schema.FrameworkIdentifier, packageName string, templateDir string) ([]byte, error) {
+	var t *template.Template
+	var err error
+	if len(templateDir) > 0 {
+		var pattern = filepath.Join(templateDir, "*.gotmpl")
+		t = template.Must(template.ParseGlob(pattern))
+	} else {
+		t, err = template.New("provider_scaffold").Parse(providerScaffoldGoTemplate)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +37,7 @@ func ProviderBytes(providerIdentifier schema.FrameworkIdentifier, packageName st
 		NameCamel:   providerIdentifier.ToCamelCase(),
 	}
 
-	err = t.Execute(&buf, templateData)
+	err = t.ExecuteTemplate(&buf, "provider_scaffold", templateData)
 	if err != nil {
 		return nil, err
 	}

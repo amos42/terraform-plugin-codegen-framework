@@ -22,6 +22,7 @@ import (
 type ScaffoldProviderCommand struct {
 	UI                    cli.Ui
 	flagProviderNameSnake string
+	flagTemplateDir       string
 	flagOutputDir         string
 	flagOutputFile        string
 	flagPackageName       string
@@ -33,6 +34,7 @@ func (cmd *ScaffoldProviderCommand) Flags() *flag.FlagSet {
 
 	fs.StringVar(&cmd.flagProviderNameSnake, "name", "", "name of provider in snake case, required")
 	fs.BoolVar(&cmd.flagForceOverwrite, "force", false, "force creation, overwriting existing files")
+	fs.StringVar(&cmd.flagTemplateDir, "template-dir", "", "directory path to scaffolded template files")
 	fs.StringVar(&cmd.flagOutputDir, "output-dir", ".", "directory path to output scaffolded code file")
 	fs.StringVar(&cmd.flagOutputFile, "output-file", "", "file name and extension to write scaffolded code to, default is 'provider.go'")
 	fs.StringVar(&cmd.flagPackageName, "package", "provider", "name of Go package for scaffolded code file")
@@ -110,7 +112,7 @@ func (cmd *ScaffoldProviderCommand) runInternal(_ context.Context) error {
 		return fmt.Errorf("'%s' is not a valid Terraform provider identifier", cmd.flagProviderNameSnake)
 	}
 
-	goBytes, err := scaffold.ProviderBytes(providerIdentifier, cmd.flagPackageName)
+	goBytes, err := scaffold.ProviderBytes(providerIdentifier, cmd.flagPackageName, cmd.flagTemplateDir)
 	if err != nil {
 		return fmt.Errorf("error creating scaffolding provider Go code: %w", err)
 	}
